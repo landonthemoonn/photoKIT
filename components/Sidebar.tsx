@@ -35,67 +35,70 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags })
   const hasActiveFilters = filters.category !== 'All' || filters.tags.length > 0 || filters.dateRange !== 'All';
 
   return (
-    <div className="w-64 bg-slate-900/40 backdrop-blur-xl border-r border-white/10 h-full hidden lg:flex flex-col flex-shrink-0 z-20">
-      <div className="p-6 border-b border-white/5">
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center">
-          <span className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
-            <IconGrid className="text-white w-5 h-5" />
-          </span>
-          PhotoKit
-        </h1>
-        <p className="text-[10px] text-slate-400 mt-2 font-medium tracking-[0.2em] uppercase ml-1">Asset Management</p>
+    <div className="h-full flex flex-col pt-8 pb-4">
+      <div className="px-6 mb-8">
+        <div className="text-[10px] font-mono text-slate-400 mb-1">CURRENT_VIEW</div>
+        <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-pk-orange animate-pulse"></div>
+            <span className="text-sm font-bold uppercase tracking-widest text-pk-black dark:text-white">Active</span>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-8">
+      <div className="flex-1 overflow-y-auto px-6 space-y-10 scrollbar-thin">
         
-        {/* Categories */}
-        <div>
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">Categories</h3>
-          <div className="space-y-1">
+        {/* Categories Group */}
+        <div className="relative">
+          <h3 className="text-[10px] font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+            <span className="w-4 h-[1px] bg-slate-400"></span>
+            Filter_01: Category
+          </h3>
+          <div className="space-y-1 pl-2 border-l border-slate-200 dark:border-white/10">
             <button
               onClick={() => handleCategoryChange('All')}
-              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-all duration-200 ${
+              className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-between group ${
                 filters.category === 'All' 
-                ? 'bg-white/10 text-white font-medium shadow-inner' 
-                : 'text-slate-400 hover:text-white hover:bg-white/5'
+                ? 'text-pk-orange' 
+                : 'text-slate-500 dark:text-slate-400 hover:text-pk-black dark:hover:text-white'
               }`}
             >
-              All Photos
+              All Assets
+              <span className={`w-1.5 h-1.5 rounded-full ${filters.category === 'All' ? 'bg-pk-orange' : 'bg-transparent group-hover:bg-slate-300'}`}></span>
             </button>
             {CATEGORIES.slice(0, 6).map(cat => (
               <button
                 key={cat}
                 onClick={() => handleCategoryChange(cat)}
-                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-all duration-200 ${
+                className={`w-full text-left px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-between group ${
                   filters.category === cat 
-                  ? 'bg-white/10 text-white font-medium shadow-inner' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'text-pk-orange' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-pk-black dark:hover:text-white'
                 }`}
               >
                 {cat}
+                <span className={`w-1.5 h-1.5 rounded-full ${filters.category === cat ? 'bg-pk-orange' : 'bg-transparent group-hover:bg-slate-300'}`}></span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tags Cloud */}
+        {/* Tags Group */}
         <div>
-          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2 flex items-center">
-            <IconTag className="w-3 h-3 mr-1" />
-            Popular Tags
+          <h3 className="text-[10px] font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+            <span className="w-4 h-[1px] bg-slate-400"></span>
+            Filter_02: Tags
           </h3>
-          <div className="flex flex-wrap gap-2 px-2">
+          <div className="flex flex-wrap gap-2">
             {availableTags.slice(0, 10).map(tag => (
               <button
                 key={tag}
                 onClick={() => handleTagToggle(tag)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-all duration-200 ${
+                className={`text-[10px] font-mono px-2 py-1 border transition-all duration-200 uppercase ${
                   filters.tags.includes(tag) 
-                    ? 'bg-indigo-500/80 text-white border-indigo-400/50 shadow-lg shadow-indigo-500/20' 
-                    : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/30 hover:text-white hover:bg-white/10'
+                    ? 'bg-pk-black text-white border-pk-black' 
+                    : 'bg-transparent text-slate-500 dark:text-slate-400 border-slate-300 dark:border-white/20 hover:border-pk-orange hover:text-pk-orange'
                 }`}
               >
-                #{tag}
+                {tag}
               </button>
             ))}
           </div>
@@ -103,46 +106,45 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags })
 
         {/* Date Filter */}
         <div>
-           <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-2">Date Uploaded</h3>
+           <h3 className="text-[10px] font-mono font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+            <span className="w-4 h-[1px] bg-slate-400"></span>
+            Filter_03: Time
+          </h3>
            <div className="relative">
              <select 
               value={filters.dateRange}
               onChange={(e) => setFilters(prev => ({...prev, dateRange: e.target.value as any}))}
-              className="w-full bg-slate-900/50 border border-white/10 rounded-lg text-sm text-slate-300 p-2.5 focus:ring-1 focus:ring-indigo-500 focus:outline-none appearance-none"
+              className="w-full bg-white/50 dark:bg-black/20 border-b-2 border-slate-200 dark:border-white/20 rounded-none text-xs font-bold uppercase text-pk-black dark:text-white p-2 focus:border-pk-orange focus:outline-none appearance-none tracking-wider cursor-pointer"
              >
                <option value="All">Any Time</option>
                <option value="Last 7 Days">Last 7 Days</option>
                <option value="Last 30 Days">Last 30 Days</option>
                <option value="This Year">This Year</option>
              </select>
-             <div className="absolute right-3 top-3 pointer-events-none">
-                <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-             </div>
            </div>
         </div>
 
       </div>
 
-      {hasActiveFilters && (
-        <div className="p-4 border-t border-white/5">
+      {/* Footer / User */}
+      <div className="mt-auto px-6 border-t border-slate-200/50 dark:border-white/5 pt-6 space-y-4">
+        {hasActiveFilters && (
           <button 
             onClick={resetFilters}
-            className="w-full flex items-center justify-center space-x-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 py-2 rounded-lg transition-colors border border-dashed border-slate-700 hover:border-slate-500"
+            className="w-full flex items-center justify-center space-x-2 text-[10px] font-bold uppercase text-slate-500 hover:text-pk-orange py-2 border border-slate-300 dark:border-white/20 hover:border-pk-orange transition-all"
           >
-            <IconTrash className="w-4 h-4" />
-            <span>Clear Filters</span>
+            <span>Reset_All</span>
           </button>
-        </div>
-      )}
+        )}
 
-      {/* User Mini Profile */}
-      <div className="p-4 border-t border-white/5 flex items-center space-x-3 bg-black/20">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold text-xs ring-2 ring-white/10">
-          AS
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white truncate">Alex Shooter</p>
-          <p className="text-[10px] text-slate-500 truncate uppercase tracking-wider">Pro Account</p>
+        <div className="flex items-center space-x-3 bg-white/60 dark:bg-white/5 p-3 rounded-lg backdrop-blur-sm">
+          <div className="w-8 h-8 rounded-full bg-pk-black text-white flex items-center justify-center font-bold text-xs ring-2 ring-white/20">
+            AS
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-pk-black dark:text-white truncate uppercase">Alex Shooter</p>
+            <p className="text-[9px] font-mono text-slate-400 truncate">PRO_LICENSE_01</p>
+          </div>
         </div>
       </div>
     </div>

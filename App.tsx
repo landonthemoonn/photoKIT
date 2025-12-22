@@ -6,7 +6,7 @@ import PhotoCard from './components/PhotoCard';
 import UploadModal from './components/UploadModal';
 import DetailModal from './components/DetailModal';
 import BulkEditModal from './components/BulkEditModal';
-import { IconSearch, IconPlus, IconFilter, IconCheck, IconX, IconLayers, IconFileText, IconEdit } from './components/Icons';
+import { IconSearch, IconPlus, IconFilter, IconCheck, IconX, IconLayers, IconFileText, IconEdit, IconSun, IconMoon } from './components/Icons';
 
 function App() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -15,6 +15,7 @@ function App() {
   const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false); // Default light to match screenshot
   
   // Selection Mode State
   const [selectionMode, setSelectionMode] = useState(false);
@@ -27,6 +28,15 @@ function App() {
     dateRange: 'All',
     tags: []
   });
+
+  // Handle Dark Mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   // Load photos on mount
   useEffect(() => {
@@ -48,7 +58,7 @@ function App() {
   const handleUpload = async (file: File, metadata: any) => {
     try {
       await photoService.uploadPhoto(file, metadata);
-      await loadPhotos(); // Refresh grid
+      await loadPhotos(); 
     } catch (error) {
       console.error("Upload failed", error);
     }
@@ -144,7 +154,7 @@ function App() {
       headers.join(','),
       ...photos.map(p => [
         p.id,
-        `"${p.title.replace(/"/g, '""')}"`, // Escape quotes
+        `"${p.title.replace(/"/g, '""')}"`, 
         `"${(p.fileName || '').replace(/"/g, '""')}"`,
         `"${p.photographer.replace(/"/g, '""')}"`,
         p.dateTaken,
@@ -161,11 +171,9 @@ function App() {
     link.click();
   };
 
-
   // Filter Logic
   const filteredPhotos = useMemo(() => {
     return photos.filter(photo => {
-      // Search
       const query = filters.searchQuery.toLowerCase();
       const matchesSearch = 
         photo.title.toLowerCase().includes(query) || 
@@ -173,17 +181,13 @@ function App() {
         photo.photographer.toLowerCase().includes(query) ||
         (photo.fileName && photo.fileName.toLowerCase().includes(query));
 
-      // Category
       const matchesCategory = filters.category === 'All' || photo.category === filters.category;
-
-      // Tags
       const matchesTags = filters.tags.length === 0 || filters.tags.every(t => photo.tags.includes(t));
 
       return matchesSearch && matchesCategory && matchesTags;
     });
   }, [photos, filters]);
 
-  // Extract unique tags for sidebar
   const allTags = useMemo(() => {
     const tags = new Set<string>();
     photos.forEach(p => p.tags.forEach(t => tags.add(t)));
@@ -191,110 +195,150 @@ function App() {
   }, [photos]);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden font-sans">
+    // Main "Device" Container - The white rounded card from the screenshot
+    <div className="w-full h-full max-w-[1600px] max-h-[95vh] bg-pk-panel/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-device overflow-hidden border border-white/40 dark:border-white/5 flex flex-col relative ring-1 ring-black/5">
       
-      {/* Sidebar - Desktop */}
-      <Sidebar filters={filters} setFilters={setFilters} availableTags={allTags} />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full min-w-0 bg-transparent">
+      {/* Decorative Blur Top Right (screenshot glow) */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-pk-orange/20 to-transparent rounded-full blur-3xl pointer-events-none -z-0 mix-blend-multiply dark:mix-blend-screen" />
+      
+      {/* Header - Pill Style Navigation */}
+      <header className="h-24 flex items-center justify-between px-8 z-20 shrink-0">
         
-        {/* Top Navigation Bar */}
-        <header className="h-20 border-b border-white/5 bg-slate-900/30 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-20">
-          <div className="flex items-center flex-1">
-            {/* Mobile Menu Trigger */}
-            <button className="lg:hidden mr-4" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              <IconFilter className="w-6 h-6 text-slate-400" />
-            </button>
-            
-            {/* Search Bar */}
-            <div className="relative w-full max-w-lg hidden md:block group">
-              <IconSearch className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-500 w-5 h-5 group-focus-within:text-indigo-400 transition-colors" />
-              <input 
-                type="text"
-                placeholder="Search photos, tags, metadata..."
-                value={filters.searchQuery}
-                onChange={(e) => setFilters(prev => ({...prev, searchQuery: e.target.value}))}
-                className="w-full bg-black/20 border border-white/5 hover:border-white/10 rounded-xl py-2.5 pl-11 pr-4 text-sm text-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500/50 focus:bg-black/40 focus:outline-none transition-all placeholder-slate-500"
-              />
-            </div>
-          </div>
+        {/* Left: Brand / Pill Nav */}
+        <div className="flex items-center gap-4">
+           {/* Logo Pill */}
+           <div className="h-12 w-12 rounded-full bg-pk-black text-white flex items-center justify-center font-bold text-xl shadow-lg border-2 border-white/20">
+             PK
+           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Selection/Bulk Actions Toolbar */}
+           {/* Nav Pills */}
+           <div className="hidden md:flex bg-white/50 dark:bg-black/20 p-1.5 rounded-full backdrop-blur-sm border border-black/5 dark:border-white/5 shadow-inner-light gap-1">
+             <button className="px-5 py-2 rounded-full bg-pk-orange text-white text-xs font-bold tracking-wider shadow-sm transition-all hover:scale-105 uppercase">
+               Library
+             </button>
+             <button className="px-5 py-2 rounded-full text-slate-600 dark:text-slate-400 text-xs font-bold tracking-wider hover:bg-white/50 dark:hover:bg-white/5 transition-all uppercase">
+               Albums
+             </button>
+             <button className="px-5 py-2 rounded-full text-slate-600 dark:text-slate-400 text-xs font-bold tracking-wider hover:bg-white/50 dark:hover:bg-white/5 transition-all uppercase">
+               Analytics
+             </button>
+           </div>
+        </div>
+
+        {/* Center: Search Pill (Floating) */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 hidden lg:block w-96 z-30">
+          <div className="relative group">
+            <input 
+              type="text"
+              placeholder="SEARCH DATABASE..."
+              value={filters.searchQuery}
+              onChange={(e) => setFilters(prev => ({...prev, searchQuery: e.target.value}))}
+              className="w-full h-12 bg-white dark:bg-black border-2 border-transparent focus:border-pk-orange rounded-full pl-12 pr-4 text-sm font-mono text-pk-black dark:text-white focus:outline-none transition-all shadow-lg placeholder-slate-400 uppercase tracking-widest"
+            />
+            <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-pk-orange transition-colors" />
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3">
+            {/* Dark Mode Toggle - Tiny Pill */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-12 h-12 rounded-full bg-white dark:bg-black border border-black/5 dark:border-white/10 flex items-center justify-center text-slate-500 hover:text-pk-orange transition-colors shadow-sm"
+            >
+              {darkMode ? <IconSun className="w-5 h-5" /> : <IconMoon className="w-5 h-5" />}
+            </button>
+
+            {/* Selection Toolbar */}
             {selectionMode ? (
-               <div className="flex items-center bg-indigo-500/10 backdrop-blur-md rounded-full px-4 py-1.5 border border-indigo-500/20 animate-in slide-in-from-top-2">
-                 <span className="text-sm font-medium text-indigo-200 mr-3">{selectedIds.size} selected</span>
-                 {selectedIds.size > 0 && (
-                   <button 
-                    onClick={() => setIsBulkEditOpen(true)}
-                    className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-full mr-2 flex items-center shadow-lg shadow-indigo-500/20 transition-all"
-                   >
-                     <IconEdit className="w-3 h-3 mr-1" />
-                     Edit
-                   </button>
-                 )}
-                 <button onClick={toggleSelectionMode} className="text-slate-400 hover:text-white transition-colors">
-                   <IconX className="w-4 h-4" />
-                 </button>
+               <div className="flex items-center bg-pk-black text-white rounded-full pl-5 pr-2 py-2 gap-4 shadow-xl animate-in fade-in slide-in-from-top-4">
+                 <span className="text-xs font-mono font-bold uppercase tracking-wider">{selectedIds.size} SELECTED</span>
+                 <div className="flex gap-1">
+                  {selectedIds.size > 0 && (
+                    <button 
+                      onClick={() => setIsBulkEditOpen(true)}
+                      className="h-8 px-4 rounded-full bg-pk-orange text-white text-xs font-bold uppercase hover:bg-white hover:text-pk-orange transition-colors"
+                    >
+                      Edit
+                    </button>
+                  )}
+                  <button onClick={toggleSelectionMode} className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors">
+                    <IconX className="w-4 h-4" />
+                  </button>
+                 </div>
                </div>
             ) : (
-               <div className="flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/5 backdrop-blur-sm">
+               <>
                  <button 
                   onClick={toggleSelectionMode}
-                  className="text-slate-400 hover:text-indigo-300 p-2 rounded-full hover:bg-white/10 transition-colors relative group"
-                  title="Select Photos"
+                  className="h-12 px-5 rounded-full bg-white dark:bg-black border border-black/5 dark:border-white/10 text-xs font-bold tracking-widest uppercase hover:bg-slate-100 dark:hover:bg-white/10 transition-all flex items-center gap-2"
                  >
-                   <IconLayers className="w-5 h-5" />
-                   <span className="absolute top-full right-0 mt-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Select</span>
+                   Select
                  </button>
                  <button 
                   onClick={handleExportCSV}
-                  className="text-slate-400 hover:text-emerald-300 p-2 rounded-full hover:bg-white/10 transition-colors relative group"
-                  title="Export Metadata CSV"
+                  className="h-12 w-12 rounded-full bg-white dark:bg-black border border-black/5 dark:border-white/10 flex items-center justify-center hover:text-pk-orange transition-colors"
+                  title="Export"
                  >
                    <IconFileText className="w-5 h-5" />
-                   <span className="absolute top-full right-0 mt-2 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Export CSV</span>
                  </button>
-               </div>
+               </>
             )}
 
+            {/* Upload Button - The Primary Call to Action */}
             <button 
               onClick={() => setIsUploadOpen(true)}
-              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-5 py-2.5 rounded-full text-sm font-semibold flex items-center transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transform hover:-translate-y-0.5"
+              className="h-12 px-6 rounded-full bg-pk-black dark:bg-white text-white dark:text-pk-black text-xs font-bold uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg flex items-center gap-2 group"
             >
-              <IconPlus className="w-4 h-4 mr-2" />
-              Upload
+              Upload <IconPlus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
             </button>
-          </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Scrollable Grid Area */}
-        <main className="flex-1 overflow-y-auto p-8 scrollbar-thin">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
-            </div>
-          ) : filteredPhotos.length > 0 ? (
-            <>
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-white flex items-center tracking-tight">
-                   Library 
-                   <span className="ml-3 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/5 text-slate-400 text-xs font-medium">{filteredPhotos.length} assets</span>
-                </h2>
-                {selectionMode && (
-                  <button 
+      {/* Main Layout Grid */}
+      <div className="flex-1 flex overflow-hidden relative z-10">
+        
+        {/* Sidebar */}
+        <div className={`
+          absolute lg:relative z-40 h-full w-72 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-white/20 dark:border-white/5 transition-transform duration-300
+          ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <Sidebar filters={filters} setFilters={setFilters} availableTags={allTags} />
+        </div>
+
+        {/* Content Area */}
+        <main className="flex-1 flex flex-col h-full overflow-hidden bg-transparent">
+          
+          {/* Content Header */}
+          <div className="h-16 flex items-center justify-between px-8 border-b border-black/5 dark:border-white/5">
+            <h2 className="text-4xl font-black tracking-tighter uppercase text-pk-black dark:text-white opacity-90">
+              Assets <span className="text-pk-orange">.</span>
+            </h2>
+            
+            <div className="flex items-center gap-4 text-xs font-mono text-slate-500">
+               <span>TOTAL: {filteredPhotos.length}</span>
+               {selectionMode && (
+                 <button 
                     onClick={() => {
                         if (selectedIds.size === filteredPhotos.length) setSelectedIds(new Set());
                         else setSelectedIds(new Set(filteredPhotos.map(p => p.id)));
                     }}
-                    className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                    className="text-pk-orange hover:underline font-bold"
                   >
-                    {selectedIds.size === filteredPhotos.length ? 'Deselect All' : 'Select All'}
+                    {selectedIds.size === filteredPhotos.length ? 'DESELECT ALL' : 'SELECT ALL'}
                   </button>
-                )}
+               )}
+            </div>
+          </div>
+
+          {/* Grid */}
+          <div className="flex-1 overflow-y-auto p-8 scrollbar-thin">
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="w-16 h-16 border-4 border-pk-black/10 border-t-pk-orange rounded-full animate-spin"></div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 pb-12">
+            ) : filteredPhotos.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {filteredPhotos.map(photo => (
                   <PhotoCard 
                     key={photo.id} 
@@ -305,23 +349,30 @@ function App() {
                   />
                 ))}
               </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-3/4 text-center">
-              <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 ring-1 ring-white/10">
-                <IconSearch className="w-10 h-10 text-slate-600" />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-3/4 text-center opacity-60">
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-slate-400 flex items-center justify-center mb-6">
+                  <IconSearch className="w-10 h-10 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-bold uppercase tracking-wider mb-2">No Assets Found</h3>
+                <button 
+                  onClick={() => setFilters({searchQuery: '', category: 'All', photographer: 'All', dateRange: 'All', tags: []})}
+                  className="text-pk-orange font-mono text-xs font-bold hover:underline"
+                >
+                  RESET_FILTERS
+                </button>
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No photos found</h3>
-              <p className="text-slate-400 max-w-sm mb-8 leading-relaxed">Try adjusting your filters or upload some new photos to populate your library.</p>
-              <button 
-                onClick={() => setFilters({searchQuery: '', category: 'All', photographer: 'All', dateRange: 'All', tags: []})}
-                className="text-indigo-400 hover:text-indigo-300 font-medium hover:underline underline-offset-4"
-              >
-                Clear all filters
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </main>
+
+        {/* Overlay for Mobile Sidebar */}
+        {mobileMenuOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
       </div>
 
       {/* Modals */}
@@ -329,7 +380,7 @@ function App() {
         <UploadModal 
           onClose={() => setIsUploadOpen(false)} 
           onUpload={handleUpload} 
-          existingPhotos={photos} // Pass photos for dup check
+          existingPhotos={photos} 
         />
       )}
       
@@ -348,16 +399,6 @@ function App() {
           onClose={() => setIsBulkEditOpen(false)}
           onSave={handleBulkUpdate}
         />
-      )}
-
-      {/* Mobile Sidebar (Overlay) */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
-          <div className="absolute left-0 top-0 bottom-0 w-3/4 max-w-xs bg-slate-900 shadow-2xl z-50">
-             <Sidebar filters={filters} setFilters={setFilters} availableTags={allTags} />
-          </div>
-        </div>
       )}
     </div>
   );
