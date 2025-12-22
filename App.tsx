@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Photo, PhotoFilter } from './types';
 import { photoService } from './services/mockService';
+import { MOCK_USERS } from './constants';
 import Sidebar from './components/Sidebar';
 import PhotoCard from './components/PhotoCard';
 import UploadModal from './components/UploadModal';
@@ -15,7 +16,15 @@ function App() {
   const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false); // Default light to match screenshot
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // User State
+  const [currentUserIndex, setCurrentUserIndex] = useState(0);
+  const currentUser = MOCK_USERS[currentUserIndex];
+
+  const handleSwitchUser = () => {
+    setCurrentUserIndex((prev) => (prev + 1) % MOCK_USERS.length);
+  };
   
   // Selection Mode State
   const [selectionMode, setSelectionMode] = useState(false);
@@ -303,7 +312,13 @@ function App() {
           absolute lg:relative z-40 h-full w-72 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-white/20 dark:border-white/5 transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <Sidebar filters={filters} setFilters={setFilters} availableTags={allTags} />
+          <Sidebar 
+            filters={filters} 
+            setFilters={setFilters} 
+            availableTags={allTags}
+            user={currentUser}
+            onSwitchUser={handleSwitchUser}
+          />
         </div>
 
         {/* Content Area */}

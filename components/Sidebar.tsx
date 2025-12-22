@@ -7,9 +7,15 @@ interface SidebarProps {
   filters: PhotoFilter;
   setFilters: React.Dispatch<React.SetStateAction<PhotoFilter>>;
   availableTags: string[];
+  user: {
+    displayName: string;
+    licenseId: string;
+    initials: string;
+  };
+  onSwitchUser: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags }) => {
+const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags, user, onSwitchUser }) => {
   
   const handleCategoryChange = (category: string) => {
     setFilters(prev => ({ ...prev, category: prev.category === category ? 'All' : category }));
@@ -137,15 +143,22 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags })
           </button>
         )}
 
-        <div className="flex items-center space-x-3 bg-white/60 dark:bg-white/5 p-3 rounded-lg backdrop-blur-sm">
-          <div className="w-8 h-8 rounded-full bg-pk-black text-white flex items-center justify-center font-bold text-xs ring-2 ring-white/20">
-            AS
+        {/* Clickable User Switcher */}
+        <button 
+          onClick={onSwitchUser}
+          className="w-full flex items-center space-x-3 bg-white/60 dark:bg-white/5 p-3 rounded-lg backdrop-blur-sm hover:bg-white/80 dark:hover:bg-white/10 transition-all cursor-pointer group text-left border border-transparent hover:border-slate-300 dark:hover:border-white/20 active:scale-[0.98]"
+          title="Switch User"
+        >
+          <div className="w-8 h-8 rounded-full bg-pk-black group-hover:bg-pk-orange transition-colors text-white flex items-center justify-center font-bold text-xs ring-2 ring-white/20">
+            {user.initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-pk-black dark:text-white truncate uppercase">Alex Shooter</p>
-            <p className="text-[9px] font-mono text-slate-400 truncate">PRO_LICENSE_01</p>
+            <p className="text-xs font-bold text-pk-black dark:text-white truncate uppercase group-hover:text-pk-orange transition-colors">
+              {user.displayName}
+            </p>
+            <p className="text-[9px] font-mono text-slate-400 truncate">{user.licenseId}</p>
           </div>
-        </div>
+        </button>
       </div>
     </div>
   );

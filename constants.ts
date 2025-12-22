@@ -1,3 +1,4 @@
+
 export const CATEGORIES = [
   'Portrait',
   'Landscape',
@@ -10,12 +11,22 @@ export const CATEGORIES = [
   'Other'
 ];
 
-export const MOCK_USER = {
-  uid: 'user_123',
-  displayName: 'Alex Shooter',
-  email: 'alex@photokit.com',
-  photoURL: 'https://picsum.photos/seed/user/100/100'
-};
+export const MOCK_USERS = [
+  {
+    uid: 'user_001',
+    displayName: 'Alex Shooter',
+    email: 'alex@photokit.com',
+    licenseId: 'PRO_LICENSE_8842',
+    initials: 'AS'
+  },
+  {
+    uid: 'user_002',
+    displayName: 'Sarah Lens',
+    email: 'sarah@photokit.com',
+    licenseId: 'STD_LICENSE_9910',
+    initials: 'SL'
+  }
+];
 
 export const INITIAL_PHOTOS_SEED = [
   {
