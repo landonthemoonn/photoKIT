@@ -237,14 +237,14 @@ function App() {
         {/* Center: Search Pill (Floating) */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 hidden lg:block w-96 z-30">
           <div className="relative group">
-            <input 
+            <input
               type="text"
               placeholder="SEARCH DATABASE..."
               value={filters.searchQuery}
               onChange={(e) => setFilters(prev => ({...prev, searchQuery: e.target.value}))}
-              className="w-full h-12 bg-white dark:bg-black border-2 border-transparent focus:border-pk-orange rounded-full pl-12 pr-4 text-sm font-mono text-pk-black dark:text-white focus:outline-none transition-all shadow-lg placeholder-slate-400 uppercase tracking-widest"
+              className="w-full h-14 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-2 border-white/30 dark:border-white/20 focus:border-pk-orange rounded-full pl-14 pr-6 text-sm font-mono text-pk-black dark:text-white focus:outline-none transition-all duration-300 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-pk-orange/10 placeholder-slate-500 dark:placeholder-slate-400 uppercase tracking-widest focus:ring-4 focus:ring-pk-orange/20"
             />
-            <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-pk-orange transition-colors" />
+            <IconSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 w-5 h-5 group-focus-within:text-pk-orange group-focus-within:scale-110 transition-all duration-300" />
           </div>
         </div>
 
