@@ -1,8 +1,11 @@
 {
   "name": "photokit-dam",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Professional Digital Asset Management System for photographers and creative teams",
   "type": "module",
+  "author": "PhotoKIT Team",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

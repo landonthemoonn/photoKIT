@@ -215,9 +215,9 @@ function App() {
         
         {/* Left: Brand / Pill Nav */}
         <div className="flex items-center gap-4">
-           {/* Logo Pill */}
-           <div className="h-12 w-12 rounded-full bg-pk-black text-white flex items-center justify-center font-bold text-xl shadow-lg border-2 border-white/20">
-             PK
+           {/* Logo */}
+           <div className="h-14 w-14 rounded-xl bg-white dark:bg-black flex items-center justify-center shadow-lg border border-black/10 dark:border-white/10 p-2 hover:scale-105 transition-transform">
+             <img src="/public/images/photokit-icon.svg" alt="PhotoKIT" className="w-full h-full" />
            </div>
 
            {/* Nav Pills */}
