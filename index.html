@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PhotoKIT - Professional Digital Asset Management System for photographers and creative teams" />
+    <meta name="theme-color" content="#FF8833" />
+    <title>PhotoKIT - Professional Digital Asset Management</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/photokit-icon-DwITwMmK.svg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              'pk-orange': '#FF8833', // The official PhotoKIT orange
+              'pk-black': '#050505',
+              'pk-offwhite': '#EAEAEA',
+              'pk-panel': '#F5F5F5',
+              zinc: {
+                950: '#09090b',
+              }
+            },
+            boxShadow: {
+              'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.1)',
+              'device': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              'inner-light': 'inset 0 2px 4px 0 rgba(255, 255, 255, 0.3)',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --bg-color: #E0E0E0;
+        --grain-url: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+      }
+      .dark {
+        --bg-color: #050505;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-color);
+        position: relative;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
+      
+      /* Grain Overlay */
+      body::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: var(--grain-url);
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.4;
+      }
+
+      /* Background Glows */
+      body::after {
+        content: "";
+        position: absolute;
+        top: 50%; left: 50%; width: 120vw; height: 120vh;
+        transform: translate(-50%, -50%);
+        background: 
+          radial-gradient(circle at 80% 20%, rgba(255, 77, 0, 0.15) 0%, transparent 40%),
+          radial-gradient(circle at 20% 80%, rgba(0, 0, 0, 0.05) 0%, transparent 40%);
+        z-index: -1;
+        pointer-events: none;
+      }
+      .dark body::after {
+        background: 
+          radial-gradient(circle at 80% 20%, rgba(255, 77, 0, 0.1) 0%, transparent 40%),
+          radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 40%);
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2); 
+        border-radius: 10px;
+      }
+      .dark ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2); 
+      }
+    </style>
+
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react-easy-crop": "https://esm.sh/react-easy-crop@5.0.0?deps=react@19.2.3,tslib@2.6.2",
+    "tslib": "https://esm.sh/tslib@2.6.2"
+  }
+}
+</script>
+  <script type="module" crossorigin src="/assets/index-Bmoc2hC6.js"></script>
+</head>
+  <body>
+    <div id="root" class="h-full w-full relative z-10 p-4 sm:p-6 lg:p-8 flex items-center justify-center"></div>
+  </body>
+</html>
