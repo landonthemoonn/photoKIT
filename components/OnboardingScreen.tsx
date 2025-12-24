@@ -2,19 +2,39 @@ import React, { useState } from 'react';
 import { IconCheck, IconUpload } from './Icons';
 
 interface OnboardingScreenProps {
-  onComplete: (userData: { name: string; email: string; organization?: string }) => void;
+  onComplete: (userData: { name: string; email: string; password: string; organization?: string }) => void;
+  authError?: string;
 }
 
-const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
+const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete, authError }) => {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [organization, setOrganization] = useState('');
+  const [error, setError] = useState('');
 
   const handleComplete = () => {
-    if (name && email) {
-      onComplete({ name, email, organization: organization || undefined });
+    setError('');
+
+    // Validation
+    if (!name || !email || !password) {
+      setError('Please fill in all required fields');
+      return;
     }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    onComplete({ name, email, password, organization: organization || undefined });
   };
 
   return (
@@ -122,6 +142,32 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
 
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                    Password <span className="text-pk-orange">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimum 6 characters"
+                    className="w-full bg-white/50 dark:bg-black/30 backdrop-blur-sm border-2 border-white/40 dark:border-white/20 focus:border-pk-orange rounded-xl px-5 py-4 text-pk-black dark:text-white placeholder-slate-400 focus:outline-none transition-all duration-300 shadow-sm focus:ring-4 focus:ring-pk-orange/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
+                    Confirm Password <span className="text-pk-orange">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter your password"
+                    className="w-full bg-white/50 dark:bg-black/30 backdrop-blur-sm border-2 border-white/40 dark:border-white/20 focus:border-pk-orange rounded-xl px-5 py-4 text-pk-black dark:text-white placeholder-slate-400 focus:outline-none transition-all duration-300 shadow-sm focus:ring-4 focus:ring-pk-orange/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 uppercase tracking-wide">
                     Organization <span className="text-slate-400 text-xs">(Optional)</span>
                   </label>
                   <input
@@ -134,6 +180,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
                 </div>
               </div>
 
+              {(error || authError) && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mt-4">
+                  <p className="text-red-600 dark:text-red-400 text-sm font-medium text-center">{error || authError}</p>
+                </div>
+              )}
+
               <div className="flex gap-3 mt-8">
                 <button
                   onClick={() => setStep(1)}
@@ -143,9 +195,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
                 </button>
                 <button
                   onClick={handleComplete}
-                  disabled={!name || !email}
+                  disabled={!name || !email || !password || !confirmPassword}
                   className={`flex-1 font-bold py-4 rounded-xl uppercase tracking-wider transition-all duration-300 shadow-xl flex items-center justify-center gap-2 ${
-                    name && email
+                    name && email && password && confirmPassword
                       ? 'bg-gradient-to-r from-pk-orange to-pk-orange/80 hover:from-pk-orange/90 hover:to-pk-orange/70 text-white shadow-pk-orange/30 hover:shadow-pk-orange/50 hover:scale-105 active:scale-95'
                       : 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-500 cursor-not-allowed opacity-50'
                   }`}

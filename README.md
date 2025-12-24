@@ -10,19 +10,22 @@
 ## Features
 
 - **Smart Asset Organization** - Upload, tag, categorize, and search your photos with ease
+- **Cloud Storage** - Firebase-powered secure cloud storage for unlimited photos
+- **User Authentication** - Secure email/password authentication with Firebase Auth
 - **Bulk Operations** - Edit metadata for multiple photos at once
 - **Advanced Filtering** - Search by title, tags, photographer, category, and more
 - **Dark Mode** - Beautiful light and dark themes
-- **Modern UI** - Clean, responsive interface with smooth animations
+- **Modern UI** - Clean, responsive glassmorphic interface with smooth animations
 - **Export Tools** - Export your catalog to CSV for external analysis
-- **User Management** - Multi-user support with role-based access
+- **Real-time Sync** - Your photos sync across all devices automatically
 
 ## Tech Stack
 
 - **React 19** - Latest React with modern hooks
 - **TypeScript** - Type-safe development
+- **Firebase** - Authentication, Firestore database, and Cloud Storage
 - **Vite** - Lightning-fast development and builds
-- **Tailwind CSS** - Utility-first styling
+- **Tailwind CSS** - Utility-first styling with glassmorphism
 - **React Easy Crop** - Advanced image cropping
 
 ## Getting Started
@@ -30,6 +33,7 @@
 ### Prerequisites
 
 - Node.js 18+ and npm
+- Firebase account (free tier works great!)
 
 ### Installation
 
@@ -44,12 +48,19 @@
    npm install
    ```
 
-3. Start the development server:
+3. **Set up Firebase** - Follow the detailed [Firebase Setup Guide](./FIREBASE_SETUP.md)
+   - Create a Firebase project
+   - Enable Authentication, Firestore, and Storage
+   - Copy your Firebase config to `.env`
+
+4. Start the development server:
    ```bash
    npm run dev
    ```
 
-4. Open your browser to `http://localhost:5173`
+5. Open your browser to `http://localhost:5173`
+
+6. Create your account in the onboarding flow
 
 ### Build for Production
 
@@ -62,19 +73,22 @@ npm run preview
 
 ```
 photoKIT/
-├── components/          # React components
-│   ├── PhotoCard.tsx   # Individual photo card
-│   ├── Sidebar.tsx     # Filter sidebar
-│   ├── UploadModal.tsx # Photo upload interface
-│   ├── DetailModal.tsx # Photo detail view
-│   └── BulkEditModal.tsx
-├── services/           # Business logic
-│   └── mockService.ts  # Mock data service
-├── public/             # Static assets
-│   └── images/         # Logo and branding
-├── App.tsx             # Main application
-├── types.ts            # TypeScript definitions
-└── index.html          # Entry point
+├── components/             # React components
+│   ├── OnboardingScreen.tsx # User registration flow
+│   ├── PhotoCard.tsx       # Individual photo card
+│   ├── Sidebar.tsx         # Filter sidebar
+│   ├── UploadModal.tsx     # Photo upload interface
+│   ├── DetailModal.tsx     # Photo detail view
+│   └── BulkEditModal.tsx   # Bulk editing interface
+├── services/              # Business logic
+│   ├── firebaseService.ts # Firebase integration
+│   └── mockService.ts     # Legacy local storage service
+├── public/                # Static assets
+│   └── images/            # Logo and branding
+├── firebase.ts            # Firebase configuration
+├── App.tsx                # Main application
+├── types.ts               # TypeScript definitions
+└── FIREBASE_SETUP.md      # Firebase setup guide
 ```
 
 ## Usage

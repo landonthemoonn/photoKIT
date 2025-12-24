@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { Photo, PhotoFilter, User } from './types';
-import { photoService } from './services/mockService';
+import { photoService, authService } from './services/firebaseService';
+import { auth } from './firebase';
 import Sidebar from './components/Sidebar';
 import PhotoCard from './components/PhotoCard';
 import UploadModal from './components/UploadModal';
@@ -9,11 +11,10 @@ import BulkEditModal from './components/BulkEditModal';
 import OnboardingScreen from './components/OnboardingScreen';
 import { IconSearch, IconPlus, IconFilter, IconCheck, IconX, IconLayers, IconFileText, IconEdit, IconSun, IconMoon } from './components/Icons';
 
-const USER_STORAGE_KEY = 'photokit_user_data';
-
 function App() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -21,27 +22,40 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authError, setAuthError] = useState<string>('');
 
-  // Check for existing user on mount
+  // Listen to Firebase auth state changes
   useEffect(() => {
-    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    } else {
-      setShowOnboarding(true);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setCurrentUser({
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          photoURL: firebaseUser.photoURL || undefined,
+        });
+        setShowOnboarding(false);
+      } else {
+        setCurrentUser(null);
+        setShowOnboarding(true);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const handleOnboardingComplete = (userData: { name: string; email: string; organization?: string }) => {
-    const user: User = {
-      uid: `user_${Date.now()}`,
-      displayName: userData.name,
-      email: userData.email,
-      photoURL: undefined,
-    };
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-    setCurrentUser(user);
-    setShowOnboarding(false);
+  const handleOnboardingComplete = async (userData: { name: string; email: string; password: string; organization?: string }) => {
+    setAuthError('');
+    try {
+      await authService.signUp(userData.email, userData.password, userData.name);
+      // onAuthStateChanged will handle updating currentUser
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      setAuthError(error.message || 'Failed to create account');
+      // Re-show onboarding with error
+      setShowOnboarding(true);
+    }
   };
   
   // Selection Mode State
@@ -65,18 +79,23 @@ function App() {
     }
   }, [darkMode]);
 
-  // Load photos on mount
+  // Load photos when user is authenticated
   useEffect(() => {
-    loadPhotos();
-  }, []);
+    if (currentUser) {
+      loadPhotos();
+    }
+  }, [currentUser]);
 
   const loadPhotos = async () => {
+    if (!currentUser) return;
+
     setLoading(true);
     try {
       const data = await photoService.getAllPhotos();
       setPhotos(data);
     } catch (err) {
       console.error(err);
+      setPhotos([]);
     } finally {
       setLoading(false);
     }
@@ -221,9 +240,21 @@ function App() {
     return Array.from(tags);
   }, [photos]);
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-pk-black/10 border-t-pk-orange rounded-full animate-spin"></div>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Show onboarding if no user
   if (showOnboarding) {
-    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+    return <OnboardingScreen onComplete={handleOnboardingComplete} authError={authError} />;
   }
 
   return (
