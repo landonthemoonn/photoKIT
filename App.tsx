@@ -271,7 +271,7 @@ function App() {
         <div className="flex items-center gap-4">
            {/* Logo */}
            <div className="h-14 w-14 rounded-xl bg-white dark:bg-black flex items-center justify-center shadow-lg border border-black/10 dark:border-white/10 p-2 hover:scale-105 transition-transform">
-             <img src="/public/images/photokit-icon.svg" alt="PhotoKIT" className="w-full h-full" />
+             <img src="/images/photokit-icon.svg" alt="PhotoKIT" className="w-full h-full" />
            </div>
 
            {/* Nav Pills */}
