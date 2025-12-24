@@ -9,13 +9,11 @@ interface SidebarProps {
   availableTags: string[];
   user: {
     displayName: string;
-    licenseId: string;
-    initials: string;
-  };
-  onSwitchUser: () => void;
+    email: string;
+  } | null;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags, user, onSwitchUser }) => {
+const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags, user }) => {
   
   const handleCategoryChange = (category: string) => {
     setFilters(prev => ({ ...prev, category: prev.category === category ? 'All' : category }));
@@ -143,22 +141,20 @@ const Sidebar: React.FC<SidebarProps> = ({ filters, setFilters, availableTags, u
           </button>
         )}
 
-        {/* Clickable User Switcher */}
-        <button
-          onClick={onSwitchUser}
-          className="w-full flex items-center space-x-3 bg-white/30 dark:bg-black/30 backdrop-blur-lg p-4 rounded-xl hover:bg-white/40 dark:hover:bg-black/40 transition-all duration-300 cursor-pointer group text-left border border-white/40 dark:border-white/20 hover:border-pk-orange shadow-lg hover:shadow-xl active:scale-[0.98]"
-          title="Switch User"
-        >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pk-orange to-pk-orange/70 group-hover:shadow-lg group-hover:shadow-pk-orange/30 transition-all duration-300 text-white flex items-center justify-center font-bold text-sm ring-2 ring-white/30">
-            {user.initials}
+        {/* User Profile */}
+        {user && (
+          <div className="w-full flex items-center space-x-3 bg-white/30 dark:bg-black/30 backdrop-blur-lg p-4 rounded-xl border border-white/40 dark:border-white/20 shadow-lg">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pk-orange to-pk-orange/70 shadow-lg shadow-pk-orange/20 transition-all duration-300 text-white flex items-center justify-center font-bold text-sm ring-2 ring-white/30">
+              {user.displayName.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-pk-black dark:text-white truncate uppercase">
+                {user.displayName}
+              </p>
+              <p className="text-[9px] font-mono text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-pk-black dark:text-white truncate uppercase group-hover:text-pk-orange transition-colors">
-              {user.displayName}
-            </p>
-            <p className="text-[9px] font-mono text-slate-500 dark:text-slate-400 truncate">{user.licenseId}</p>
-          </div>
-        </button>
+        )}
       </div>
     </div>
   );

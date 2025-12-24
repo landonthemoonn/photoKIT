@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Photo, PhotoFilter } from './types';
+import { Photo, PhotoFilter, User } from './types';
 import { photoService } from './services/mockService';
-import { MOCK_USERS } from './constants';
 import Sidebar from './components/Sidebar';
 import PhotoCard from './components/PhotoCard';
 import UploadModal from './components/UploadModal';
 import DetailModal from './components/DetailModal';
 import BulkEditModal from './components/BulkEditModal';
+import OnboardingScreen from './components/OnboardingScreen';
 import { IconSearch, IconPlus, IconFilter, IconCheck, IconX, IconLayers, IconFileText, IconEdit, IconSun, IconMoon } from './components/Icons';
+
+const USER_STORAGE_KEY = 'photokit_user_data';
 
 function App() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -17,13 +19,29 @@ function App() {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  
-  // User State
-  const [currentUserIndex, setCurrentUserIndex] = useState(0);
-  const currentUser = MOCK_USERS[currentUserIndex];
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const handleSwitchUser = () => {
-    setCurrentUserIndex((prev) => (prev + 1) % MOCK_USERS.length);
+  // Check for existing user on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser));
+    } else {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = (userData: { name: string; email: string; organization?: string }) => {
+    const user: User = {
+      uid: `user_${Date.now()}`,
+      displayName: userData.name,
+      email: userData.email,
+      photoURL: undefined,
+    };
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    setCurrentUser(user);
+    setShowOnboarding(false);
   };
   
   // Selection Mode State
@@ -203,6 +221,11 @@ function App() {
     return Array.from(tags);
   }, [photos]);
 
+  // Show onboarding if no user
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} />;
+  }
+
   return (
     // Main "Device" Container - The white rounded card from the screenshot
     <div className="w-full h-full max-w-[1600px] max-h-[95vh] bg-pk-panel/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-device overflow-hidden border border-white/40 dark:border-white/5 flex flex-col relative ring-1 ring-black/5">
@@ -312,12 +335,11 @@ function App() {
           absolute lg:relative z-40 h-full w-72 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-white/20 dark:border-white/5 transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <Sidebar 
-            filters={filters} 
-            setFilters={setFilters} 
+          <Sidebar
+            filters={filters}
+            setFilters={setFilters}
             availableTags={allTags}
             user={currentUser}
-            onSwitchUser={handleSwitchUser}
           />
         </div>
 
