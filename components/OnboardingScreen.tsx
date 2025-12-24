@@ -47,7 +47,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete, authErr
         {/* Logo & Header */}
         <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white dark:bg-black rounded-2xl shadow-2xl shadow-pk-orange/20 border border-white/40 dark:border-white/10 mb-6 backdrop-blur-xl">
-            <img src="/images/photokit-icon.svg" alt="PhotoKIT" className="w-12 h-12" />
+            <img src={`${import.meta.env.BASE_URL}images/photokit-icon.svg`} alt="PhotoKIT" className="w-12 h-12" />
           </div>
           <h1 className="text-5xl font-black tracking-tighter uppercase text-pk-black dark:text-white mb-3">
             Photo<span className="text-pk-orange">KIT</span>
