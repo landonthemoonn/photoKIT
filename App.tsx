@@ -1,29 +1,61 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Photo, PhotoFilter } from './types';
-import { photoService } from './services/mockService';
-import { MOCK_USERS } from './constants';
+import { onAuthStateChanged } from 'firebase/auth';
+import { Photo, PhotoFilter, User } from './types';
+import { photoService, authService } from './services/firebaseService';
+import { auth } from './firebase';
 import Sidebar from './components/Sidebar';
 import PhotoCard from './components/PhotoCard';
 import UploadModal from './components/UploadModal';
 import DetailModal from './components/DetailModal';
 import BulkEditModal from './components/BulkEditModal';
+import OnboardingScreen from './components/OnboardingScreen';
 import { IconSearch, IconPlus, IconFilter, IconCheck, IconX, IconLayers, IconFileText, IconEdit, IconSun, IconMoon } from './components/Icons';
 
 function App() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isBulkEditOpen, setIsBulkEditOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  
-  // User State
-  const [currentUserIndex, setCurrentUserIndex] = useState(0);
-  const currentUser = MOCK_USERS[currentUserIndex];
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authError, setAuthError] = useState<string>('');
 
-  const handleSwitchUser = () => {
-    setCurrentUserIndex((prev) => (prev + 1) % MOCK_USERS.length);
+  // Listen to Firebase auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setCurrentUser({
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName || 'User',
+          email: firebaseUser.email || '',
+          photoURL: firebaseUser.photoURL || undefined,
+        });
+        setShowOnboarding(false);
+      } else {
+        setCurrentUser(null);
+        setShowOnboarding(true);
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleOnboardingComplete = async (userData: { name: string; email: string; password: string; organization?: string }) => {
+    setAuthError('');
+    try {
+      await authService.signUp(userData.email, userData.password, userData.name);
+      // onAuthStateChanged will handle updating currentUser
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      setAuthError(error.message || 'Failed to create account');
+      // Re-show onboarding with error
+      setShowOnboarding(true);
+    }
   };
   
   // Selection Mode State
@@ -47,18 +79,23 @@ function App() {
     }
   }, [darkMode]);
 
-  // Load photos on mount
+  // Load photos when user is authenticated
   useEffect(() => {
-    loadPhotos();
-  }, []);
+    if (currentUser) {
+      loadPhotos();
+    }
+  }, [currentUser]);
 
   const loadPhotos = async () => {
+    if (!currentUser) return;
+
     setLoading(true);
     try {
       const data = await photoService.getAllPhotos();
       setPhotos(data);
     } catch (err) {
       console.error(err);
+      setPhotos([]);
     } finally {
       setLoading(false);
     }
@@ -203,6 +240,23 @@ function App() {
     return Array.from(tags);
   }, [photos]);
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-pk-black/10 border-t-pk-orange rounded-full animate-spin"></div>
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show onboarding if no user
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={handleOnboardingComplete} authError={authError} />;
+  }
+
   return (
     // Main "Device" Container - The white rounded card from the screenshot
     <div className="w-full h-full max-w-[1600px] max-h-[95vh] bg-pk-panel/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-device overflow-hidden border border-white/40 dark:border-white/5 flex flex-col relative ring-1 ring-black/5">
@@ -215,9 +269,9 @@ function App() {
         
         {/* Left: Brand / Pill Nav */}
         <div className="flex items-center gap-4">
-           {/* Logo Pill */}
-           <div className="h-12 w-12 rounded-full bg-pk-black text-white flex items-center justify-center font-bold text-xl shadow-lg border-2 border-white/20">
-             PK
+           {/* Logo */}
+           <div className="h-14 w-14 rounded-xl bg-white dark:bg-black flex items-center justify-center shadow-lg border border-black/10 dark:border-white/10 p-2 hover:scale-105 transition-transform">
+             <img src={`${import.meta.env.BASE_URL}images/photokit-icon.svg`} alt="PhotoKIT" className="w-full h-full" />
            </div>
 
            {/* Nav Pills */}
@@ -237,14 +291,14 @@ function App() {
         {/* Center: Search Pill (Floating) */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 hidden lg:block w-96 z-30">
           <div className="relative group">
-            <input 
+            <input
               type="text"
               placeholder="SEARCH DATABASE..."
               value={filters.searchQuery}
               onChange={(e) => setFilters(prev => ({...prev, searchQuery: e.target.value}))}
-              className="w-full h-12 bg-white dark:bg-black border-2 border-transparent focus:border-pk-orange rounded-full pl-12 pr-4 text-sm font-mono text-pk-black dark:text-white focus:outline-none transition-all shadow-lg placeholder-slate-400 uppercase tracking-widest"
+              className="w-full h-14 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-2 border-white/30 dark:border-white/20 focus:border-pk-orange rounded-full pl-14 pr-6 text-sm font-mono text-pk-black dark:text-white focus:outline-none transition-all duration-300 shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-pk-orange/10 placeholder-slate-500 dark:placeholder-slate-400 uppercase tracking-widest focus:ring-4 focus:ring-pk-orange/20"
             />
-            <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-pk-orange transition-colors" />
+            <IconSearch className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400 w-5 h-5 group-focus-within:text-pk-orange group-focus-within:scale-110 transition-all duration-300" />
           </div>
         </div>
 
@@ -312,12 +366,11 @@ function App() {
           absolute lg:relative z-40 h-full w-72 bg-white/40 dark:bg-black/40 backdrop-blur-xl border-r border-white/20 dark:border-white/5 transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <Sidebar 
-            filters={filters} 
-            setFilters={setFilters} 
+          <Sidebar
+            filters={filters}
+            setFilters={setFilters}
             availableTags={allTags}
             user={currentUser}
-            onSwitchUser={handleSwitchUser}
           />
         </div>
 

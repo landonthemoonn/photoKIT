@@ -1,21 +1,20 @@
 import { Photo } from '../types';
-import { INITIAL_PHOTOS_SEED } from '../constants';
 
 // In a real app, this would be `firebase/firestore` and `firebase/storage` code.
-// We are simulating persistence with localStorage for the demo.
+// We are simulating persistence with localStorage.
 
 const STORAGE_KEY = 'photokit_library_v1';
 
 export const photoService = {
   getAllPhotos: async (): Promise<Photo[]> => {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 600)); 
-    
+    await new Promise(resolve => setTimeout(resolve, 600));
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
-      // Seed initial data
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_PHOTOS_SEED));
-      return INITIAL_PHOTOS_SEED as Photo[];
+      // Start with empty library
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+      return [];
     }
     return JSON.parse(stored) as Photo[];
   },
